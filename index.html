@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prime Store</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #0b0b0b;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      text-align: center;
+      padding: 35px 15px;
+      border-bottom: 1px solid #333;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 42px;
+      letter-spacing: 5px;
+    }
+    header p {
+      color: #c9a45c;
+      letter-spacing: 7px;
+      margin: 8px 0 0;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 16px 8px;
+      border-bottom: 1px solid #333;
+      flex-wrap: wrap;
+    }
+    nav a { color: white; text-decoration: none; }
+    .hero {
+      text-align: center;
+      padding: 55px 15px;
+      background: linear-gradient(140deg, #202020, #080808);
+    }
+    .hero h2 { font-size: 30px; }
+    .hero p { color: #ccc; }
+    .products { padding: 25px 15px; }
+    .products h2 { text-align: center; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .item {
+      background: #171717;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+    .photo {
+      font-size: 58px;
+      padding: 22px 0;
+      background: #222;
+      border-radius: 8px;
+    }
+    .price { color: #d6b36b; font-weight: bold; }
+    button {
+      background: #c9a45c;
+      border: 0;
+      padding: 10px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 4px;
+    }
+    #cart { text-align: center; padding: 20px; }
+    footer {
+      text-align: center;
+      padding: 25px;
+      color: #aaa;
+      border-top: 1px solid #333;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PRIME</h1>
+    <p>STORE</p>
+  </header>
+
+  <nav>
+    <a href="#home">الرئيسية</a>
+    <a href="#products">المنتجات</a>
+    <a href="#cart">السلة 🛒</a>
+  </nav>
+
+  <section class="hero" id="home">
+    <h2>اختار أناقتك مع PRIME</h2>
+    <p>ساعات ومحافظ وإكسسوارات تناسب ذوقك</p>
+    <a href="#products"><button>تسوق الآن</button></a>
+  </section>
+
+  <section class="products" id="products">
+    <h2>منتجاتنا</h2>
+    <div class="grid">
+      <div class="item">
+        <div class="photo">⌚</div>
+        <h3>ساعة أنيقة</h3>
+        <p class="price">750 جنيه</p>
+        <button onclick="add('ساعة أنيقة',750)">أضف للسلة</button>
+      </div>
+      <div class="item">
+        <div class="photo">👛</div>
+        <h3>محفظة جلد</h3>
+        <p class="price">250 جنيه</p>
+        <button onclick="add('محفظة جلد',250)">أضف للسلة</button>
+      </div>
+      <div class="item">
+        <div class="photo">🕶️</div>
+        <h3>إكسسوار أنيق</h3>
+        <p class="price">180 جنيه</p>
+        <button onclick="add('إكسسوار أنيق',180)">أضف للسلة</button>
+      </div>
+      <div class="item">
+        <div class="photo">🎁</div>
+        <h3>هدية مميزة</h3>
+        <p class="price">300 جنيه</p>
+        <button onclick="add('هدية مميزة',300)">أضف للسلة</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="cart">
+    <h2>سلة المشتريات</h2>
+    <div id="items">السلة فارغة</div>
+    <p id="total">الإجمالي: 0 جنيه</p>
+    <p>لطلب المنتجات، تواصل معنا عبر واتساب بعد إضافة رقم المتجر.</p>
+  </section>
+
+  <footer>© PRIME STORE</footer>
+
+  <script>
+    const cart = [];
+    function add(name, price) {
+      cart.push({name, price});
+      document.getElementById('items').innerHTML =
+        cart.map((p, i) =>
+          `<p>${p.name} - ${p.price} جنيه
+          <button onclick="removeItem(${i})">حذف</button></p>`
+        ).join('');
+      document.getElementById('total').textContent =
+        'الإجمالي: ' +
+        cart.reduce((sum, p) => sum + p.price, 0) + ' جنيه';
+    }
+    function removeItem(index) {
+      cart.splice(index, 1);
+      if (!cart.length) {
+        document.getElementById('items').textContent = 'السلة فارغة';
+        document.getElementById('total').textContent = 'الإجمالي: 0 جنيه';
+        return;
+      }
+      document.getElementById('items').innerHTML =
+        cart.map((p, i) =>
+          `<p>${p.name} - ${p.price} جنيه
+          <button onclick="removeItem(${i})">حذف</button></p>`
+        ).join('');
+      document.getElementById('total').textContent =
+        'الإجمالي: ' +
+        cart.reduce((sum, p) => sum + p.price, 0) + ' جنيه';
+    }
+  </script>
+</body>
+</html>
