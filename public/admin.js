@@ -8,17 +8,18 @@ const productsList = document.getElementById("productsList");
 const ordersList = document.getElementById("ordersList");
 const dashboardMessage = document.getElementById("dashboardMessage");
 const logoutButton = document.getElementById("logoutButton");
+const imageInput = document.getElementById("productImage");
+const imagePreview = document.getElementById("imagePreview");
 
 async function api(url, options = {}) {
   const response = await fetch(url, {
     credentials: "same-origin",
     ...options,
     headers: {
-      "Content-Type": "application/json",
+      ...(options.body instanceof FormData ? {} : {"Content-Type": "application/json"}),
       ...(options.headers || {})
     }
   });
-
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || "حصل خطأ، حاول تاني.");
   return data;
@@ -37,6 +38,25 @@ async function checkLogin() {
   } catch {
     showDashboard(false);
   }
+}
+
+if (imageInput && imagePreview) {
+  imageInput.addEventListener("change", () => {
+    const file = imageInput.files[0];
+    if (!file) {
+      imagePreview.hidden = true;
+      imagePreview.removeAttribute("src");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      productMessage.textContent = "اختار ملف صورة صالح.";
+      imageInput.value = "";
+      return;
+    }
+    imagePreview.src = URL.createObjectURL(file);
+    imagePreview.hidden = false;
+    productMessage.textContent = "";
+  });
 }
 
 loginForm.addEventListener("submit", async event => {
@@ -68,18 +88,53 @@ logoutButton.addEventListener("click", async () => {
 
 productForm.addEventListener("submit", async event => {
   event.preventDefault();
+
   const form = new FormData(productForm);
-  const product = Object.fromEntries(form.entries());
-  product.price = Number(product.price);
-  product.stock = Number(product.stock);
-  productMessage.textContent = "جاري إضافة المنتج...";
+  const file = imageInput?.files?.[0];
+
+  if (!file) {
+    productMessage.textContent = "اختار صورة للمنتج من موبايلك.";
+    return;
+  }
+  if (!file.type.startsWith("image/")) {
+    productMessage.textContent = "الملف المختار مش صورة.";
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    productMessage.textContent = "حجم الصورة لازم يكون 5 ميجابايت أو أقل.";
+    return;
+  }
+
+  productMessage.textContent = "جاري رفع الصورة وحفظ المنتج...";
 
   try {
+    const uploadForm = new FormData();
+    uploadForm.append("image", file);
+
+    const uploaded = await api("/api/admin/upload-image", {
+      method: "POST",
+      body: uploadForm
+    });
+
+    const product = {
+      name: String(form.get("name") || "").trim(),
+      description: String(form.get("description") || "").trim(),
+      price: Number(form.get("price")),
+      stock: Number(form.get("stock")),
+      category: String(form.get("category") || "").trim(),
+      image_url: uploaded.image_url
+    };
+
     await api("/api/admin/products", {
       method: "POST",
       body: JSON.stringify(product)
     });
+
     productForm.reset();
+    if (imagePreview) {
+      imagePreview.hidden = true;
+      imagePreview.removeAttribute("src");
+    }
     productMessage.textContent = "تمت إضافة المنتج بنجاح.";
     await loadProducts();
   } catch (error) {
@@ -100,6 +155,17 @@ async function loadProducts() {
     const card = document.createElement("article");
     const title = document.createElement("h3");
     title.textContent = product.name;
+
+    if (product.image_url) {
+      const img = document.createElement("img");
+      img.src = product.image_url;
+      img.alt = product.name;
+      img.loading = "lazy";
+      img.style.maxWidth = "160px";
+      img.style.maxHeight = "160px";
+      img.style.objectFit = "contain";
+      card.append(img);
+    }
 
     const details = document.createElement("p");
     details.textContent =
