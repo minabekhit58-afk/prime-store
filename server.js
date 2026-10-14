@@ -39,6 +39,65 @@ function adminOnly(req, res, next) {
   return res.status(401).json({ error: "يلزم تسجيل دخول الإدارة." });
 }
 const clean = v => typeof v === "string" ? v.trim() : "";
+const crypto = require("crypto");
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(file.mimetype)) {
+      return cb(new Error("نوع الصورة غير مدعوم. استخدم JPG أو PNG أو WebP."));
+    }
+    cb(null, true);
+  }
+});
+
+app.post("/api/admin/upload-image", adminOnly, (req, res) => {
+  upload.single("image")(req, res, async err => {
+    if (err) {
+      return res.status(400).json({
+        error: err.message || "تعذر رفع الصورة."
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: "اختار صورة أولًا." });
+    }
+
+    const extensions = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp"
+    };
+
+    const filePath =
+      `products/${crypto.randomUUID()}.${extensions[req.file.mimetype]}`;
+
+    try {
+      const { error } = await supabase.storage
+        .from("product-images")
+        .upload(filePath, req.file.buffer, {
+          contentType: req.file.mimetype,
+          upsert: false
+        });
+
+      if (error) {
+        console.error("Image upload failed:", error.message);
+        return res.status(500).json({ error: "فشل رفع الصورة. حاول تاني." });
+      }
+
+      const { data } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(filePath);
+
+      return res.status(201).json({ image_url: data.publicUrl });
+    } catch (error) {
+      console.error("Image upload failed:", error.message);
+      return res.status(500).json({ error: "حصل خطأ أثناء رفع الصورة." });
+    }
+  });
+});
 
 app.get("/api/config", (req, res) => {
   res.json({ whatsappNumber: (process.env.WHATSAPP_NUMBER || "201206770572").replace(/\D/g, "") });
