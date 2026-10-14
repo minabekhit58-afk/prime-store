@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>إدارة PRIME STORE</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>PRIME STORE</h1>
+    <p>لوحة تحكم المتجر</p>
+  </header>
+
+  <main>
+    <section id="login">
+      <h2>تسجيل دخول الإدارة</h2>
+      <form id="loginForm">
+        <label for="password">كلمة المرور</label>
+        <input id="password" type="password" required>
+        <button type="submit">دخول</button>
+      </form>
+      <p id="loginMessage"></p>
+    </section>
+
+    <section id="dashboard" hidden>
+      <button id="logoutButton" type="button">تسجيل الخروج</button>
+
+      <h2>إضافة منتج</h2>
+      <form id="productForm">
+        <input name="name" placeholder="اسم المنتج" required>
+        <textarea name="description" placeholder="وصف المنتج"></textarea>
+        <input name="price" type="number" min="0" step="0.01" placeholder="السعر بالجنيه" required>
+        <input name="stock" type="number" min="0" step="1" placeholder="الكمية المتاحة" required>
+        <input name="category" placeholder="القسم: ساعات أو محافظ أو إكسسوارات">
+        <input name="image_url" type="url" placeholder="رابط صورة يبدأ بـ https://">
+        <button type="submit">إضافة المنتج</button>
+      </form>
+      <p id="productMessage"></p>
+
+      <h2>المنتجات</h2>
+      <div id="productsList"></div>
+
+      <h2>الطلبات</h2>
+      <div id="ordersList"></div>
+      <p id="dashboardMessage"></p>
+    </section>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>
