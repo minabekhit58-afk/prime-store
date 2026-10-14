@@ -3,6 +3,7 @@ const express = require("express");
 const session = require("express-session");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const multer = require("multer");
 const { createClient } = require("@supabase/supabase-js");
 const path = require("path");
 
